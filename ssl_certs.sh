@@ -35,6 +35,23 @@ openssl pkcs12 -export -out client_keycert.p12 -in client_cert.pem -inkey client
 
 }
 
+function data_bag {
+  cat <<EOF
+{
+  "id": "ssl",
+  "client": {
+    "cert": "$(cat client_cert.pem | awk '{ printf "%s\\n", $0 }')", 
+    "key": "$(cat client_key.pem | awk '{ printf "%s\\n", $0 }')"
+  },
+  "server": {
+    "cacert": "$(cat testca/cacert.pem | awk '{ printf "%s\\n", $0 }')", 
+    "cert": "$(cat server_cert.pem | awk '{ printf "%s\\n", $0 }')", 
+    "key": "$(cat server_key.pem | awk '{ printf "%s\\n", $0 }')"    
+  }
+}
+EOF
+}
+
 if [ "$1" = "generate" ]; then 
   echo "Generating ssl certificates..."
   generate
@@ -42,6 +59,8 @@ if [ "$1" = "generate" ]; then
 elif [ "$1" = "clean" ]; then
   echo "Cleaning up previously generated certificates..."
   clean
+elif [ "$1" = "data_bag" ]; then
+  data_bag
 else
-  echo "You must run the script with either generate or clean, e.g. ./ssl_certs.sh generate"
+  echo "You must run the script with either generate, data_bag, or clean, e.g. ./ssl_certs.sh generate"
 fi
